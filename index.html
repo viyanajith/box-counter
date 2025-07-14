@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Click at 5 Seconds</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      user-select: none;
+    }
+
+    #gameArea {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+    }
+
+    #targetBox {
+      width: 100px;
+      height: 100px;
+      background-color: black;
+      cursor: pointer;
+      display: none;
+    }
+
+    #info {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    #scoreDisplay {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+
+    #startContainer {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      text-align: left;
+      width: 340px;
+    }
+
+    #instruction {
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    #startBtn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎯 Click at Exactly 5 Seconds</h1>
+
+<div id="info">
+  <div>Your Time: <span id="yourTime">0.000</span> seconds</div>
+  <div>Score: <span id="score">-</span></div>
+  <div>High Score: <span id="highScore">--</span></div>
+</div>
+
+<div id="gameArea">
+  <div id="targetBox"></div>
+</div>
+
+<div id="scoreDisplay"></div>
+
+<div id="startContainer">
+  <h4 id="instruction">
+    In this game you have to click the black box at exactly 5 seconds after you click the start button, your high score will be saved as well! Also the lower number you get (like 0.01) the better your score is, the higher number you get (like 0.950) you have a worse score, you lost is the worst right below 1 and 0.000 is the best. So try your best to count perfectly.
+  </h4>
+  <button id="startBtn">Start</button>
+</div>
+
+<script>
+  let startTime = null;
+  let clicked = false;
+  let highScore = parseFloat(localStorage.getItem("bestScore"));
+
+  const yourTimeEl = document.getElementById("yourTime");
+  const scoreEl = document.getElementById("score");
+  const highScoreEl = document.getElementById("highScore");
+  const scoreDisplay = document.getElementById("scoreDisplay");
+  const targetBox = document.getElementById("targetBox");
+  const startBtn = document.getElementById("startBtn");
+
+  if (!isNaN(highScore)) {
+    highScoreEl.textContent = highScore.toFixed(3);
+  } else {
+    highScoreEl.textContent = "--";
+  }
+
+  startBtn.onclick = () => {
+    clicked = false;
+    scoreEl.textContent = "-";
+    yourTimeEl.textContent = "0.000";
+    scoreDisplay.textContent = "";
+    targetBox.style.display = "block";
+    startTime = performance.now();
+  };
+
+  targetBox.onclick = () => {
+    if (clicked) return;
+    clicked = true;
+
+    const currentTime = performance.now();
+    const yourTime = (currentTime - startTime) / 1000;
+    yourTimeEl.textContent = yourTime.toFixed(3);
+
+    const score = Math.abs(yourTime - 5);
+    const scoreString = score.toFixed(3);
+
+    scoreEl.textContent = scoreString;
+    scoreDisplay.textContent = `⏱ You were off by ${scoreString} seconds`;
+
+    if (isNaN(highScore) || score < highScore) {
+      highScore = score;
+      localStorage.setItem("bestScore", highScore);
+      highScoreEl.textContent = highScore.toFixed(3);
+      scoreDisplay.textContent += " 🏆 New Best!";
+    }
+
+    targetBox.style.display = "none";
+  };
+</script>
+
+</body>
+</html>
